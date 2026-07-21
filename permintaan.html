@@ -230,8 +230,8 @@
                         <option value="">Pilih Fungsi</option>
                         <option value="Tata Usaha">Tata Usaha</option>
                         <option value="Pemeriksaan">Pemeriksaan</option>
-                        <option value="Pengujian">Pengujian</option>
                         <option value="Sertifikasi">Sertifikasi</option>
+                        <option value="Pengujian">Pengujian</option>
                         <option value="Infokom">Infokom</option>
                         <option value="Penindakan">Penindakan</option>
                     </select>
@@ -253,14 +253,14 @@
         </form>
     </div>
 
-    <!-- FILTER & RIWAYAT - TANPA FILTER JENIS -->
+    <!-- FILTER & RIWAYAT -->
     <div class="card">
         <div class="card-title">
             📋 Riwayat Transaksi
             <span class="badge-count" id="totalTransaksiCount">0</span>
         </div>
 
-        <!-- HANYA FILTER TANGGAL -->
+        <!-- FILTER TANGGAL -->
         <div class="form-row-2">
             <div class="form-group">
                 <label>📅 Dari Tanggal</label>
@@ -300,7 +300,7 @@
     // ============================================
     // KONFIGURASI
     // ============================================
-    const API_URL = 'https://script.google.com/macros/s/AKfycbw8HTOX4mCdd491pq_Pdw8QUJVPM8zRNSvWm7pJ1l5O5MnPJNkDRnnz7KE7QI4nFymy/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycby9QrQsOYVqz0q6BgNNDwItqgh-eXTO4zfStCTBSu-P_r9AkIdnIiKE0kG76QB89MB8/exec';
 
     // ============================================
     // LOAD BARANG OPTIONS
@@ -322,7 +322,7 @@
     }
 
     // ============================================
-    // LOAD RIWAYAT - TANPA FILTER JENIS
+    // LOAD RIWAYAT - DENGAN FILTER TANGGAL
     // ============================================
     async function loadRiwayat() {
         const tglMulai = document.getElementById('filterTanggalMulai').value;
@@ -385,7 +385,7 @@
     }
 
     // ============================================
-    // FILTER SUMMARY - TANPA JENIS
+    // FILTER SUMMARY
     // ============================================
     function updateFilterSummary(tglMulai, tglSampai, total) {
         const summary = document.getElementById('filterSummary');
