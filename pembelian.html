@@ -110,6 +110,14 @@
             padding-bottom: 12px;
             border-bottom: 2px solid var(--gray-100);
         }
+        .card-title .badge-count {
+            background: var(--primary-light);
+            color: white;
+            font-size: 12px;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
 
         .form-group { margin-bottom: 14px; }
         .form-group label { display: block; font-weight: 600; color: var(--gray-700); margin-bottom: 5px; font-size: 13px; }
@@ -128,6 +136,7 @@
             box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.15);
         }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
         .btn {
             padding: 10px 24px;
@@ -161,6 +170,19 @@
         .table-wrapper .empty-state { text-align: center; padding: 40px 20px; color: var(--gray-500); }
         .table-wrapper .empty-state .icon { font-size: 40px; display: block; margin-bottom: 10px; }
 
+        .filter-summary {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding: 12px 16px;
+            background: white;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+        .filter-summary .tag { background: var(--gray-100); padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
+
         .checkbox-group { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
         .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
         .checkbox-group label { font-weight: 600; color: var(--gray-700); font-size: 14px; cursor: pointer; }
@@ -171,6 +193,7 @@
             .header { padding: 18px 20px; flex-direction: column; text-align: center; }
             .header h1 { font-size: 20px; justify-content: center; }
             .form-row { grid-template-columns: 1fr; }
+            .form-row-2 { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -181,9 +204,10 @@
     <header class="header">
         <div>
             <h1>🛒 Pembelian ATK</h1>
-            <div class="subtitle">Catat pembelian & tambah barang baru</div>
+            <div class="subtitle">Catat pembelian & filter riwayat pembelian</div>
         </div>
         <div class="header-actions">
+            <button onclick="resetFilters()" class="btn">🔄 Reset Filter</button>
             <button onclick="location.reload()" class="btn">⟳ Refresh</button>
         </div>
     </header>
@@ -260,12 +284,26 @@
         </form>
     </div>
 
-    <!-- RIWAYAT PEMBELIAN -->
+    <!-- FILTER & RIWAYAT PEMBELIAN -->
     <div class="card">
         <div class="card-title">
             📋 Riwayat Pembelian (Barang Masuk)
             <span class="badge-count" id="totalPembelianCount">0</span>
         </div>
+
+        <!-- FILTER TANGGAL -->
+        <div class="form-row-2">
+            <div class="form-group">
+                <label>📅 Dari Tanggal</label>
+                <input type="date" id="filterTanggalMulai" onchange="loadPembelian()">
+            </div>
+            <div class="form-group">
+                <label>📅 Sampai Tanggal</label>
+                <input type="date" id="filterTanggalSampai" onchange="loadPembelian()">
+            </div>
+        </div>
+
+        <div id="filterSummary" class="filter-summary" style="display:none;"></div>
 
         <div class="table-wrapper">
             <table>
@@ -291,7 +329,7 @@
     // ============================================
     // KONFIGURASI
     // ============================================
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwa68yaMxjs1cp2d16wXSoThoWDauk_X9Cj-k_wrdk8SITgVnYT3RR6mknVzmeaZ6_A/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycby9QrQsOYVqz0q6BgNNDwItqgh-eXTO4zfStCTBSu-P_r9AkIdnIiKE0kG76QB89MB8/exec';
 
     // ============================================
     // TOGGLE BARANG BARU
@@ -332,16 +370,26 @@
     }
 
     // ============================================
-    // LOAD PEMBELIAN - FILTER JENIS "Masuk"
+    // LOAD PEMBELIAN - DENGAN FILTER TANGGAL
     // ============================================
     async function loadPembelian() {
+        const tglMulai = document.getElementById('filterTanggalMulai').value;
+        const tglSampai = document.getElementById('filterTanggalSampai').value;
+
         try {
-            const response = await fetch(`${API_URL}?action=getTransaksi&jenis=Masuk`);
+            let url = `${API_URL}?action=getTransaksi&jenis=Masuk`;
+            if (tglMulai) url += `&tanggalMulai=${encodeURIComponent(tglMulai)}`;
+            if (tglSampai) url += `&tanggalSampai=${encodeURIComponent(tglSampai)}`;
+
+            console.log('📡 Fetching:', url);
+
+            const response = await fetch(url);
             const result = await response.json();
 
             if (result.status === 'success') {
                 renderPembelian(result.data);
                 document.getElementById('totalPembelianCount').textContent = result.data.length;
+                updateFilterSummary(tglMulai, tglSampai, result.data.length);
             } else {
                 document.getElementById('pembelianBody').innerHTML = `<tr><td colspan="5" style="color:red; text-align:center;">❌ ${result.message}</td></tr>`;
             }
@@ -357,7 +405,7 @@
     function renderPembelian(data) {
         const tbody = document.getElementById('pembelianBody');
         if (!data || data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><span class="icon">📭</span>Belum ada pembelian</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><span class="icon">📭</span>Tidak ada pembelian</td></tr>`;
             return;
         }
 
@@ -377,6 +425,33 @@
         });
 
         tbody.innerHTML = html;
+    }
+
+    // ============================================
+    // FILTER SUMMARY
+    // ============================================
+    function updateFilterSummary(tglMulai, tglSampai, total) {
+        const summary = document.getElementById('filterSummary');
+        let tags = [];
+        if (tglMulai) tags.push(`<span class="tag">📅 Dari ${tglMulai}</span>`);
+        if (tglSampai) tags.push(`<span class="tag">📅 Sampai ${tglSampai}</span>`);
+
+        if (tags.length > 0) {
+            summary.innerHTML = `
+                <span style="font-weight:600;">Filter aktif:</span>
+                ${tags.join(' ')}
+                <span style="margin-left:auto; color:var(--gray-500);">Menampilkan <strong>${total}</strong> transaksi</span>
+            `;
+            summary.style.display = 'flex';
+        } else {
+            summary.style.display = 'none';
+        }
+    }
+
+    function resetFilters() {
+        document.getElementById('filterTanggalMulai').value = '';
+        document.getElementById('filterTanggalSampai').value = '';
+        loadPembelian();
     }
 
     // ============================================
