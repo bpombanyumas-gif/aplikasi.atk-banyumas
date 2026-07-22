@@ -5,157 +5,331 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem ATK - Dashboard</title>
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f0f4f8; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { background: linear-gradient(135deg, #1a365d, #2b6cb0); color: white; padding: 20px 30px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-        .header h1 { margin: 0; font-size: 24px; }
-        .header .subtitle { font-size: 14px; opacity: 0.8; }
-        .nav { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-        .nav a { background: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; color: #2d3748; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s; }
-        .nav a.active { background: #2b6cb0; color: white; }
-        .nav a:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(43,108,176,0.3); }
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
-        .card h2 { margin-top: 0; color: #2d3748; font-size: 18px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-box { background: linear-gradient(135deg, #ebf4ff, #bee3f8); padding: 15px; border-radius: 10px; text-align: center; }
-        .stat-box .number { font-size: 28px; font-weight: 700; color: #2b6cb0; }
-        .stat-box .label { font-size: 13px; color: #4a5568; }
-        .stat-box.green { background: linear-gradient(135deg, #f0fff4, #c6f6d5); }
-        .stat-box.green .number { color: #48bb78; }
-        .stat-box.red { background: linear-gradient(135deg, #fff5f5, #fed7d7); }
-        .stat-box.red .number { color: #fc8181; }
-        .stat-box.orange { background: linear-gradient(135deg, #fffbeb, #feebc8); }
-        .stat-box.orange .number { color: #ed8936; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        table th { background: #edf2f7; padding: 12px; text-align: left; font-weight: 600; color: #2d3748; }
-        table td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
-        table tr:hover { background: #f7fafc; }
-        .badge { padding: 3px 12px; border-radius: 20px; font-size: 12px; color: white; }
-        .badge.green { background: #48bb78; }
-        .badge.orange { background: #ed8936; }
-        .badge.red { background: #fc8181; }
-        .badge.gray { background: #a0aec0; }
-        .loading { text-align: center; padding: 40px; color: #718096; }
-        .refresh-btn { background: rgba(255,255,255,0.2); border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; color: white; font-size: 13px; }
-        .refresh-btn:hover { background: rgba(255,255,255,0.3); }
-        @media (max-width: 768px) { .header { flex-direction: column; text-align: center; } .stats { grid-template-columns: 1fr 1fr; } table { font-size: 12px; } }
+        :root {
+            --primary: #1a365d;
+            --primary-light: #2b6cb0;
+            --success: #48bb78;
+            --danger: #fc8181;
+            --warning: #ed8936;
+            --gray-100: #edf2f7;
+            --gray-200: #e2e8f0;
+            --gray-500: #718096;
+            --gray-700: #2d3748;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 0; }
+        body { background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1280px; margin: 0 auto; }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 24px 32px;
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: var(--shadow-md);
+        }
+        .header h1 { font-size: 26px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .header .subtitle { font-size: 14px; opacity: 0.85; margin-top: 4px; }
+        .header-actions .btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 18px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: var(--transition);
+        }
+        .header-actions .btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
+
+        .nav {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            background: white;
+            padding: 8px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+        }
+        .nav a {
+            padding: 10px 22px;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            color: var(--gray-700);
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav a:hover { background: var(--gray-100); }
+        .nav a.active { background: var(--primary-light); color: white; box-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); }
+
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 24px;
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-700);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--gray-100);
+        }
+        .card-title .badge-count {
+            background: var(--primary-light);
+            color: white;
+            font-size: 12px;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: white;
+            padding: 16px 20px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            border: 1px solid var(--gray-200);
+            transition: var(--transition);
+        }
+        .stat-box:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .stat-box .number { font-size: 28px; font-weight: 700; }
+        .stat-box .label { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
+        .stat-box.blue .number { color: var(--primary-light); }
+        .stat-box.green .number { color: var(--success); }
+        .stat-box.red .number { color: var(--danger); }
+        .stat-box.orange .number { color: var(--warning); }
+        .stat-box.purple .number { color: #805ad5; }
+
+        .table-wrapper { overflow-x: auto; margin-top: 12px; }
+        .table-wrapper table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .table-wrapper th { background: var(--gray-100); padding: 10px 14px; text-align: left; font-weight: 700; color: var(--gray-700); white-space: nowrap; }
+        .table-wrapper td { padding: 10px 14px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; }
+        .table-wrapper tr:hover td { background: var(--gray-50); }
+        .table-wrapper .badge { padding: 3px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; color: white; }
+        .table-wrapper .badge-success { background: var(--success); }
+        .table-wrapper .badge-warning { background: var(--warning); }
+        .table-wrapper .badge-danger { background: var(--danger); }
+        .table-wrapper .empty-state { text-align: center; padding: 40px 20px; color: var(--gray-500); }
+        .table-wrapper .empty-state .icon { font-size: 40px; display: block; margin-bottom: 10px; }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-200);
+        }
+        .pagination .info { font-size: 13px; color: var(--gray-500); }
+        .pagination .pages { display: flex; gap: 6px; flex-wrap: wrap; }
+        .pagination .pages .btn { padding: 6px 14px; font-size: 13px; min-width: 36px; justify-content: center; }
+        .pagination .pages .btn.active { background: var(--primary-light); color: white; border-color: var(--primary-light); }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary { background: var(--primary-light); color: white; }
+        .btn-primary:hover { background: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(43, 108, 176, 0.3); }
+        .btn-outline { background: transparent; border: 2px solid var(--gray-200); color: var(--gray-700); }
+        .btn-outline:hover { border-color: var(--primary-light); color: var(--primary-light); }
+        .btn-sm { padding: 5px 14px; font-size: 12px; }
+
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .header { padding: 18px 20px; flex-direction: column; text-align: center; }
+            .header h1 { font-size: 20px; justify-content: center; }
+            .stats { grid-template-columns: 1fr 1fr; }
+            .pagination { flex-direction: column; align-items: center; }
+        }
+        @media (max-width: 480px) { .stats { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div>
-                <h1>📊 SIAP ATK Balai POM di Banyumas</h1>
-                <div class="subtitle">SIstem Aplikasi Pengelolaan ATK Balai POM Banyumas</div>
-                <div class="subtitle">Rekap Stok & Transaksi Real-time</div>
-            </div>
-            <div style="font-size:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <span id="lastUpdate">🔄 Memuat...</span>
-                <button class="refresh-btn" onclick="loadDashboard()">↻ Refresh</button>
-            </div>
+<div class="container">
+    <header class="header">
+        <div>
+            <h1>📊 Dashboard ATK</h1>
+            <div class="subtitle">Rekap Stok & Transaksi Real-time</div>
         </div>
+        <div class="header-actions">
+            <span id="lastUpdate" style="font-size:13px; opacity:0.85;">🔄 Memuat...</span>
+            <button onclick="loadDashboard()" class="btn">↻ Refresh</button>
+        </div>
+    </header>
 
-        <div class="nav">
-            <a href="index.html" class="active">📊 Dashboard</a>
-            <a href="permintaan.html">📝 Permintaan</a>
-            <a href="pembelian.html">🛒 Pembelian</a>
-            <a href="kartu-stok.html">📋 Kartu Stok</a>
-        </div>
+    <nav class="nav">
+        <a href="index.html" class="active">📊 Dashboard</a>
+        <a href="permintaan.html">📝 Permintaan</a>
+        <a href="pembelian.html">🛒 Pembelian</a>
+        <a href="kartu-stok.html">📋 Kartu Stok</a>
+    </nav>
 
-        <!-- Statistik Rekap -->
-        <div class="stats" id="statsContainer">
-            <div class="stat-box"><div class="number" id="totalBarang">0</div><div class="label">Total Barang</div></div>
-            <div class="stat-box"><div class="number" id="totalStok">0</div><div class="label">Total Stok</div></div>
-            <div class="stat-box orange"><div class="number" id="stokRendah">0</div><div class="label">Stok Menipis</div></div>
-            <div class="stat-box green"><div class="number" id="totalMasuk">0</div><div class="label">Total Masuk</div></div>
-            <div class="stat-box red"><div class="number" id="totalKeluar">0</div><div class="label">Total Keluar</div></div>
-            <div class="stat-box"><div class="number" id="totalPermintaan">0</div><div class="label">Total Permintaan</div></div>
-        </div>
-
-        <!-- Tabel Stok -->
-        <div class="card">
-            <h2>📦 Data Stok Barang</h2>
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nama Barang</th>
-                            <th>Stok Awal</th>
-                            <th>Masuk</th>
-                            <th>Keluar</th>
-                            <th>Stok Akhir</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="stokTableBody">
-                        <tr><td colspan="7" class="loading">⏳ Memuat data...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <div class="stats" id="statsContainer">
+        <div class="stat-box blue"><div class="number" id="totalBarang">0</div><div class="label">📦 Total Barang</div></div>
+        <div class="stat-box purple"><div class="number" id="totalStok">0</div><div class="label">📊 Total Stok</div></div>
+        <div class="stat-box orange"><div class="number" id="stokRendah">0</div><div class="label">⚠️ Stok Menipis</div></div>
+        <div class="stat-box green"><div class="number" id="totalMasuk">0</div><div class="label">📥 Total Masuk</div></div>
+        <div class="stat-box red"><div class="number" id="totalKeluar">0</div><div class="label">📤 Total Keluar</div></div>
+        <div class="stat-box blue"><div class="number" id="totalPermintaan">0</div><div class="label">📝 Total Permintaan</div></div>
     </div>
 
-    <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxFKswbwQj8W4Fo2WIOo0U5J8F8YlqnNZVN6SeD052sEIhtjFCYOCu9xkneWfQ7jkFW/exec'; // GANTI DENGAN URL ANDA
+    <div class="card">
+        <div class="card-title">📦 Data Stok Barang <span class="badge-count" id="totalStokCount">0</span></div>
+        <div class="table-wrapper">
+            <table>
+                <thead><tr><th>ID</th><th>Nama Barang</th><th>Stok Awal</th><th>Masuk</th><th>Keluar</th><th>Stok Akhir</th><th>Status</th></tr></thead>
+                <tbody id="stokTableBody"><tr><td colspan="7" style="text-align:center; padding:40px; color:var(--gray-500);"><span style="font-size:32px; display:block; margin-bottom:12px;">⏳</span> Memuat data...</td></tr></tbody>
+            </table>
+        </div>
+        <div class="pagination" id="paginationContainer">
+            <div class="info" id="paginationInfo">Menampilkan 0 dari 0 data</div>
+            <div class="pages" id="paginationPages"></div>
+        </div>
+    </div>
+</div>
 
-        async function loadDashboard() {
-            try {
-                const response = await fetch(`${API_URL}?action=getDashboard`);
-                const result = await response.json();
-                
-                if (result.status === 'success') {
-                    const d = result.data;
-                    document.getElementById('totalBarang').textContent = d.totalBarang || 0;
-                    document.getElementById('totalStok').textContent = d.totalStok || 0;
-                    document.getElementById('stokRendah').textContent = d.stokRendah || 0;
-                    document.getElementById('totalMasuk').textContent = d.totalMasuk || 0;
-                    document.getElementById('totalKeluar').textContent = d.totalKeluar || 0;
-                    document.getElementById('totalPermintaan').textContent = d.totalPermintaan || 0;
-                    document.getElementById('lastUpdate').textContent = '🔄 Update: ' + new Date().toLocaleTimeString('id-ID');
-                    
-                    renderStokTable(d.daftarBarang || []);
-                } else {
-                    document.getElementById('stokTableBody').innerHTML = '<tr><td colspan="7" style="color:red;">❌ ' + (result.message || 'Gagal memuat data') + '</td></tr>';
-                }
-            } catch (error) {
-                document.getElementById('stokTableBody').innerHTML = '<tr><td colspan="7" style="color:red;">❌ Error koneksi</td></tr>';
-                console.error(error);
+<script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzx3wLyymAucuI-1KO-fdRoQpXv0YoTng8jJFRp7hD9zyRkjal1Q_nmQXyPDsNHIPEz/exec';
+    let allData = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    async function loadDashboard() {
+        try {
+            const response = await fetch(`${API_URL}?action=getDashboard`);
+            const result = await response.json();
+            if (result.status === 'success') {
+                const d = result.data;
+                document.getElementById('totalBarang').textContent = d.totalBarang || 0;
+                document.getElementById('totalStok').textContent = d.totalStok || 0;
+                document.getElementById('stokRendah').textContent = d.stokRendah || 0;
+                document.getElementById('totalMasuk').textContent = d.totalMasuk || 0;
+                document.getElementById('totalKeluar').textContent = d.totalKeluar || 0;
+                document.getElementById('totalPermintaan').textContent = d.totalPermintaan || 0;
+                document.getElementById('lastUpdate').textContent = '🔄 Update: ' + new Date().toLocaleTimeString('id-ID');
+                allData = d.daftarBarang || [];
+                document.getElementById('totalStokCount').textContent = allData.length;
+                currentPage = 1;
+                renderPage(currentPage);
+            } else {
+                document.getElementById('stokTableBody').innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">❌ ${result.message || 'Gagal memuat data'}</td></tr>`;
+                document.getElementById('paginationContainer').style.display = 'none';
             }
+        } catch (error) {
+            document.getElementById('stokTableBody').innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">❌ Error koneksi</td></tr>`;
+            document.getElementById('paginationContainer').style.display = 'none';
+            console.error('Error:', error);
         }
+    }
 
-        function renderStokTable(data) {
-            const tbody = document.getElementById('stokTableBody');
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7">📭 Belum ada data</td></tr>';
-                return;
-            }
+    function renderPage(page) {
+        const totalItems = allData.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+        currentPage = page;
+        const start = (page - 1) * itemsPerPage;
+        const end = Math.min(start + itemsPerPage, totalItems);
+        const pageData = allData.slice(start, end);
+        renderStokTable(pageData);
+        renderPagination(page, totalPages, totalItems);
+    }
 
-            let html = '';
-            data.forEach(item => {
-                const stok = item.stokAkhir || 0;
-                let badge = 'badge green';
-                let status = 'Tersedia';
-                if (stok <= 0) { badge = 'badge red'; status = 'Habis'; }
-                else if (stok < 10) { badge = 'badge orange'; status = 'Menipis'; }
-
-                html += `<tr>
-                    <td><strong>${item.id || '-'}</strong></td>
-                    <td>${item.nama || '-'}</td>
-                    <td>${item.stokAwal || 0}</td>
-                    <td>${item.barangMasuk || 0}</td>
-                    <td>${item.barangKeluar || 0}</td>
-                    <td><strong>${stok}</strong></td>
-                    <td><span class="${badge}">${status}</span></td>
-                </tr>`;
-            });
-            tbody.innerHTML = html;
+    function renderStokTable(data) {
+        const tbody = document.getElementById('stokTableBody');
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><span class="icon">📭</span>Belum ada data barang</td></tr>`;
+            return;
         }
+        let html = '';
+        data.forEach(item => {
+            const stok = item.stokAkhir || 0;
+            let badge = 'badge-success', status = 'Tersedia';
+            if (stok <= 0) { badge = 'badge-danger'; status = 'Habis'; }
+            else if (stok < 10) { badge = 'badge-warning'; status = 'Menipis'; }
+            html += `<tr><td><strong>${item.id || '-'}</strong></td><td>${item.nama || '-'}</td><td>${item.stokAwal || 0}</td><td>${item.barangMasuk || 0}</td><td>${item.barangKeluar || 0}</td><td><strong>${stok}</strong></td><td><span class="badge ${badge}">${status}</span></td></tr>`;
+        });
+        tbody.innerHTML = html;
+    }
 
-        // Auto refresh setiap 30 detik
-        setInterval(loadDashboard, 30000);
-        document.addEventListener('DOMContentLoaded', loadDashboard);
-    </script>
+    function renderPagination(current, total, totalItems) {
+        const container = document.getElementById('paginationContainer');
+        const info = document.getElementById('paginationInfo');
+        const pages = document.getElementById('paginationPages');
+        if (totalItems === 0) { container.style.display = 'none'; return; }
+        container.style.display = 'flex';
+        const start = (current - 1) * itemsPerPage + 1;
+        const end = Math.min(current * itemsPerPage, totalItems);
+        info.textContent = `Menampilkan ${start}-${end} dari ${totalItems} data`;
+        let html = '';
+        html += `<button class="btn btn-outline btn-sm" onclick="goToPage(${current-1})" ${current <= 1 ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>◀</button>`;
+        const maxVisible = 5;
+        let startPage = Math.max(1, current - Math.floor(maxVisible / 2));
+        let endPage = Math.min(total, startPage + maxVisible - 1);
+        if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
+        if (startPage > 1) {
+            html += `<button class="btn btn-outline btn-sm" onclick="goToPage(1)">1</button>`;
+            if (startPage > 2) html += `<span style="padding:0 4px;color:var(--gray-500);">…</span>`;
+        }
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<button class="btn ${i === current ? 'btn-primary active btn-sm' : 'btn-outline btn-sm'}" onclick="goToPage(${i})">${i}</button>`;
+        }
+        if (endPage < total) {
+            if (endPage < total - 1) html += `<span style="padding:0 4px;color:var(--gray-500);">…</span>`;
+            html += `<button class="btn btn-outline btn-sm" onclick="goToPage(${total})">${total}</button>`;
+        }
+        html += `<button class="btn btn-outline btn-sm" onclick="goToPage(${current+1})" ${current >= total ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>▶</button>`;
+        pages.innerHTML = html;
+    }
+
+    function goToPage(page) {
+        const totalPages = Math.ceil(allData.length / itemsPerPage) || 1;
+        if (page < 1 || page > totalPages) return;
+        renderPage(page);
+    }
+
+    setInterval(loadDashboard, 30000);
+    document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
 </body>
 </html>
